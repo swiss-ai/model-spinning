@@ -49,7 +49,7 @@ def parse_duration(time_str):
 def run_cmd(cmd, shell=False):
     """Run a subprocess command and print both stdout and stderr"""
     print(f"Running command: {cmd}")
-    if isinstance(cmd, list):
+    if isinstance(cmd, list) and shell:
         cmd = " ".join(cmd)
     proc = subprocess.run(
         cmd,
@@ -67,7 +67,7 @@ def run_cmd(cmd, shell=False):
 
 
 def get_help_content(filename):
-    repo = "https://raw.githubusercontent.com/swiss-ai/mmore/refs/heads/master/"
+    repo = "https://raw.githubusercontent.com/swiss-ai/model-spinning/refs/heads/main"
     url = f"{repo}/{filename}"
     
     try:
@@ -77,7 +77,6 @@ def get_help_content(filename):
             return response.text
         
         print(f"Failed to fetch {url}, status: {response.status_code}")
-        print("Trying local file...")
     except Exception as e:
         print(f"Failed to fetch from GitHub: {e}")
         print("Trying local file...")
@@ -94,7 +93,6 @@ def main():
     parser.add_argument("--account", help="Slurm account to use for job submission")
     # Parse only known arguments, leaving the rest for the sp command
     args, extra_args = parser.parse_known_args()
-    print(args, extra_args)
 
     # Documentation -h, --vllm-help, --sp-help
     if args.vllm_help:
@@ -130,13 +128,13 @@ def main():
         node = "bristen"
         print("It's bristen so be aware that the time is limited and you can run a model up to 1 hour. While on clariden up to 24")
         partition = "debug"
-        ocf_command = '/ocfbin/ocf-arm'
+        ocf_command = "/ocfbin/ocf-v2"
         NCCL_SO_PATH = "export SP_NCCL_SO_PATH=/usr/lib/x86_64-linux-gnu/" 
     elif hostname.startswith("clariden"):
         node = "clariden"
         print("Clariden node is used")
         partition = "normal"
-        ocf_command = "/ocfbin/ocf-v2"
+        ocf_command = '/ocfbin/ocf-arm'
         NCCL_SO_PATH = "export SP_NCCL_SO_PATH=/usr/lib/aarch64-linux-gnu/" 
     else:
         print("It's neither clariden nor bristen node. Aborting")
