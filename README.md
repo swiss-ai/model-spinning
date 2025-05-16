@@ -19,13 +19,13 @@ A utility for launching and serving AI models on SLURM clusters at CSCS.
 
    ```bash
    # Launch Mistral 7B with tensor parallelism 2 for 30 minutes
-   spin-model.py --model mistralai/Mistral-7B-Instruct-v0.3 --tp-size 2 --time 30m --account YOUR_ACCOUNT
+   spin-model --model mistralai/Mistral-7B-Instruct-v0.3 --tp-size 2 --time 30m --account YOUR_ACCOUNT
    ```
  
 ## Usage
 
 ```
-usage: spin-model.py [-h] [--model MODEL] [--time TIME] [--vllm] [--vllm-help]
+usage: spin-model [-h] [--model MODEL] [--time TIME] [--vllm] [--vllm-help]
                      [--sp-help] [--account ACCOUNT] [--env ENV]
                      [--environment ENVIRONMENT]
 
@@ -57,8 +57,8 @@ Additional model-specific arguments can be passed after the main arguments.
   - [vLLM documentation](https://github.com/swiss-ai/mmore/blob/master/vllm-docs.txt)
   - View these docs directly with:
     ```bash
-    spin-model.py --sp-help    # For sp server options
-    spin-model.py --vllm-help  # For vllm server options
+    spin-model --sp-help    # For sp server options
+    spin-model --vllm-help  # For vllm server options
     ```
 
 ### Tensor Parallelism
@@ -90,46 +90,46 @@ The `--env` parameter allows you to specify custom environment variables for you
 
 You can specify multiple environment variables by using `--env` multiple times.
 ```bash 
-spin-model.py --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm --env HF_TOKEN=hf_abcdef0123456789 --env OPENAI_API_KEY=sk-proj-rniovncziroeuHNOIniuonOIU --env GOOGLE_API_KEY=aoimrewopv_einworcxz
+spin-model --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm --env HF_TOKEN=hf_abcdef0123456789 --env OPENAI_API_KEY=sk-proj-rniovncziroeuHNOIniuonOIU --env GOOGLE_API_KEY=aoimrewopv_einworcxz
 ```
 
 ### Model launch examples 
 
 ```bash
 # Apertus 70B - SwissAI model
-spin-model.py --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
+spin-model --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
     --served-model-name swissai/-70b-0425 \
     --account YOUR_ACCOUNT \
     --tp-size 4
 
 # Standard model launches (using sp server)
 # Gemma 3 12B - Latest Google model with strong performance
-spin-model.py --model google/gemma-3-12b-it --tp-size 2 --time 4h --account YOUR_ACCOUNT
+spin-model --model google/gemma-3-12b-it --tp-size 2 --time 4h --account YOUR_ACCOUNT
 
 # Qwen 2.5 7B 
-spin-model.py --model Qwen/Qwen2.5-7B-Instruct --tp-size 2 --time 4h --account YOUR_ACCOUNT
+spin-model --model Qwen/Qwen2.5-7B-Instruct --tp-size 2 --time 4h --account YOUR_ACCOUNT
 
 # DeepSeek 14B - Distilled version of Qwen for better efficiency
-spin-model.py --model deepseek-ai/DeepSeek-R1-Distill-Qwen-14B --tp-size 2 --time 4h --account YOUR_ACCOUNT
+spin-model --model deepseek-ai/DeepSeek-R1-Distill-Qwen-14B --tp-size 2 --time 4h --account YOUR_ACCOUNT
 
 # vLLM-only architectures (must use --vllm flag)
 # Mistral 7B 
-spin-model.py --model mistralai/Mistral-7B-Instruct-v0.3 --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
+spin-model --model mistralai/Mistral-7B-Instruct-v0.3 --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
 
 # Phi-3 Mini 
-spin-model.py --model microsoft/Phi-3-mini-4k-instruct --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
+spin-model --model microsoft/Phi-3-mini-4k-instruct --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
 
 # Gemma 2 9B - Previous generation Google model
-spin-model.py --model google/gemma-2-9b-it --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
+spin-model --model google/gemma-2-9b-it --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
 
 # Launch Aya Expanse 8B model with vLLM server with a custom variable
-spin-model.py --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm --env HF_TOKEN=hf_abcdef0123456789
+spin-model --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm --env HF_TOKEN=hf_abcdef0123456789
 ```
 
 ### Local Model Launch and Apertus
 
 ```bash
-spin-model.py --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
+spin-model --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
     --served-model-name swissai/-70b-0425 \
     --account YOUR_ACCOUNT \
     --tp-size 4
