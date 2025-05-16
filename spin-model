@@ -163,3 +163,5 @@ echo - Chat with model: https://fmapi.swissai.cscs.ch/chat
 echo
 echo To cancel this job/model, run:
 echo  scancel $JOBID
+echo 
+echo "[Warning] This Command is deprecated. Please use the new command `spin-model.py` instead."

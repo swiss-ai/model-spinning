@@ -79,7 +79,6 @@ def get_help_content(filename):
         print(f"Failed to fetch {url}, status: {response.status_code}")
     except Exception as e:
         print(f"Failed to fetch from GitHub: {e}")
-        print("Trying local file...")
     
 
 def main():
@@ -91,6 +90,8 @@ def main():
     parser.add_argument("--vllm-help", action="store_true", help="Show available options for **vllm** model server")
     parser.add_argument("--sp-help", action="store_true", help="Show available options for **sp** model server")
     parser.add_argument("--account", help="Slurm account to use for job submission")
+    parser.add_argument("--env", action="append", help="Specify environment variables in format KEY=VALUE", default=[])
+    parser.add_argument("--environment", help="Specify a custom environment file path")
     # Parse only known arguments, leaving the rest for the sp command
     args, extra_args = parser.parse_known_args()
 
@@ -127,15 +128,22 @@ def main():
     if hostname.startswith("nid"):
         node = "bristen"
         print("It's bristen so be aware that the time is limited and you can run a model up to 1 hour. While on clariden up to 24")
-        partition = "debug"
+        # partition = "debug"
+        # PARTITION = "#SBATCH --partition=debug"
+        PARTITION = ""
         ocf_command = "/ocfbin/ocf-v2"
         NCCL_SO_PATH = "export SP_NCCL_SO_PATH=/usr/lib/x86_64-linux-gnu/" 
+        ENV_TOML = args.environment if args.environment else "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp.toml"
     elif hostname.startswith("clariden"):
         node = "clariden"
         print("Clariden node is used")
-        partition = "normal"
+        # partition = "normal"
+        PARTITION = "#SBATCH --partition=normal"
         ocf_command = '/ocfbin/ocf-arm'
         NCCL_SO_PATH = "export SP_NCCL_SO_PATH=/usr/lib/aarch64-linux-gnu/" 
+        ENV_TOML = args.environment if args.environment else "/capstor/store/cscs/swissai/a09/xyao/llm_service/clariden/sp-arm.toml"
+        if "apertus" in model.lower() or any("apertus" in arg.lower() for arg in extra_args):
+            print("[Warning] It seems like you're trying to launch Apertus on Clariden. Please note that we can run Apertus only on Bristen.")
     else:
         print("It's neither clariden nor bristen node. Aborting")
         sys.exit(1)
@@ -160,8 +168,8 @@ def main():
 
     # Convert timeout to SLURM format
     slurm_time = parse_duration(args.time)
+    print(f"Time allocated for model: {slurm_time}")
 
-    ENV_TOML = "/capstor/store/cscs/swissai/a09/xyao/llm_service/clariden/sp-arm.toml"
 
     # Construct the full command for serving
     if args.vllm:
@@ -171,7 +179,8 @@ def main():
 
         # Rewrite an NCCL.so path for vllm on clariden
         NCCL_SO_PATH = "export VLLM_NCCL_SO_PATH=/usr/lib/aarch64-linux-gnu/"
-        ENV_TOML = "/capstor/store/cscs/swissai/a09/xyao/llm_service/clariden/vllm.toml"
+        if not args.environment:
+            ENV_TOML = "/capstor/store/cscs/swissai/a09/xyao/llm_service/clariden/vllm.toml"
 
 
     serve_command = f"{'vllm' if args.vllm else 'sp'} serve {model} --host 0.0.0.0 --port 8080 {' '.join(extra_args)}"
@@ -179,6 +188,14 @@ def main():
     # Print the constructed command
     print("Command for serving:")
     print(serve_command)
+
+    # Process environment variables from --env
+    env_vars = ""
+    for env_var in args.env:
+        if "=" in env_var:
+            env_vars += f"export {env_var}\n"
+        else:
+            print(f"Warning: Ignoring invalid environment variable format: {env_var}")
 
     # Create SLURM script content
     log_files = f"{logs_dir}/model-logs-%j"
@@ -188,17 +205,18 @@ def main():
 #SBATCH --output={log_files}.out
 #SBATCH --error={log_files}.err
 #SBATCH --container-writable
-#SBATCH --partition={partition}
 #SBATCH --time={slurm_time}
 #SBATCH --ntasks-per-node=1
 #SBATCH --dependency=singleton
 #SBATCH --account={args.account}
 #SBATCH --environment={ENV_TOML}
+{PARTITION}
 
 export NCCL_SOCKET_IFNAME=lo
 export GLOO_SOCKET_IFNAME=lo
 export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch
 {NCCL_SO_PATH}
+{env_vars}
 
 {ocf_command} start --bootstrap.addr /ip4/148.187.108.172/tcp/43905/p2p/Qmb9DHNUeVaB4asfiGY1mY4KhSDp61sEoLwZqLqUSowi9a --subprocess "{serve_command}" \\
     --service.name llm \\
@@ -235,21 +253,21 @@ export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch
 
     print(f"""
 Job submitted. To know estimated time of start, run:
- squeue --me --start
+  squeue --me --start
 
 Your job ID is: {jobid}
 
-Useful links:
-- Dashboard (all models): https://fmapi.swissai.cscs.ch/dashboard
-- Check model status: https://fmapi.swissai.cscs.ch/job/{jobid}
-- Chat with model: https://fmapi.swissai.cscs.ch/chat
+To get more information about the job: 
+  scontrol show job {jobid}
 
 To cancel this job/model, run:
- scancel {jobid}
+  scancel {jobid}
 
 To view logs for this job:
- cat {log_files.replace('%j', jobid)}.out  # For stdout
- cat {log_files.replace('%j', jobid)}.err  # For stderr
+  cat {log_files.replace('%j', jobid)}.out  # For stdout
+  cat {log_files.replace('%j', jobid)}.err  # For stderr
+
+Chat with model when it's ready: https://fmapi.swissai.cscs.ch/chat
 """)
 
 
