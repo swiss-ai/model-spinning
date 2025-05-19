@@ -98,7 +98,7 @@ spin-model --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h 
 ```bash
 # Apertus 70B - SwissAI model
 spin-model --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
-    --served-model-name swissai/-70b-0425 \
+    --served-model-name swissai/apertus3-70b-0425 \
     --account YOUR_ACCOUNT \
     --tp-size 4
 
@@ -130,12 +130,12 @@ spin-model --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h 
 
 ```bash
 spin-model --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
-    --served-model-name swissai/-70b-0425 \
+    --served-model-name swissai/apertus3-70b-0425 \
     --account YOUR_ACCOUNT \
     --tp-size 4
 ```
 
-The `--model` parameter specifies the actual path to your model checkpoint. Please, make sure the the environment (.toml file) has a mount point at `/a10`. 
+The `--model` parameter specifies the actual path to your model checkpoint. Please, make sure the environment (.toml file) has a mount point at `/a10`. 
 
 The `--served-model-name` parameter allows you to specify a user-friendly name for your model when it's served. 
 
