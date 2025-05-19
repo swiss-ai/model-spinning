@@ -53,7 +53,7 @@ Additional model-specific arguments can be passed after the main arguments.
 
 - **Model Server**: By default, the script uses the `sp` model server. For certain architectures, you can use `--vllm` to switch to the vLLM server.
 - **Documentation**: 
-  - [SP (SentencePiece) documentation](https://github.com/swiss-ai/model-spinning/blob/main/sp-docs.txt)
+  - [Scratchpad (sp) documentation](https://github.com/swiss-ai/model-spinning/blob/main/sp-docs.txt)
   - [vLLM documentation](https://github.com/swiss-ai/model-spinning/blob/main/vllm-docs.txt)
   - View these docs directly with:
     ```bash
