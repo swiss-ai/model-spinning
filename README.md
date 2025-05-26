@@ -70,6 +70,8 @@ The `--tp-size` parameter specifies the tensor parallelism size when a model is 
 - Models < 45B parameters: `--tp-size 3`
 - Models < 90B parameters: `--tp-size 4`
 
+Note: When using vLLM, the tensor parallelism parameter is called `--tensor-parallel-size` instead of `--tp-size`.
+
 ### Time Allocation
 
 The `--time` parameter accepts various formats:

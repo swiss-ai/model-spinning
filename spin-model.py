@@ -94,8 +94,12 @@ def main():
     parser.add_argument("--environment", help="Specify a custom environment file path")
     # Parse only known arguments, leaving the rest for the sp command
     args, extra_args = parser.parse_known_args()
+    served_model_name = next((extra_args[i+1] for i, arg in enumerate(extra_args) if arg == '--served-model-name'), None)
+    if served_model_name and '--' in served_model_name:
+        print("[Warning] The served model name contains dashes (--). This may cause issues.")
+    
+    print(f"Served model name: {served_model_name if served_model_name else model}")
 
-    # Documentation -h, --vllm-help, --sp-help
     if args.vllm_help:
         print(get_help_content("vllm-docs.txt"))
         sys.exit(0)
@@ -201,7 +205,7 @@ def main():
     log_files = f"{logs_dir}/model-logs-%j"
 
     job_script = f"""#!/bin/bash
-#SBATCH --job-name={'vllm' if args.vllm else 'sp'}-{model}
+#SBATCH --job-name={'vllm' if args.vllm else 'sp'}-{served_model_name if served_model_name else model}
 #SBATCH --output={log_files}.out
 #SBATCH --error={log_files}.err
 #SBATCH --container-writable
