@@ -7,7 +7,29 @@ import re
 import subprocess
 import sys
 import requests
-from datetime import datetime
+
+
+import requests
+from bs4 import BeautifulSoup
+
+def get_avatar_img_url(hf_username):
+    url = f"https://huggingface.co/{hf_username}"
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        print(f"Failed to load page for {hf_username}")
+        return None
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    # Find the first <img> tag with all the specified classes
+    img = soup.select_one("img.h-full.w-full.rounded-lg.object-cover")
+
+    if img and img.has_attr('src'):
+        return img['src']
+    else:
+        print("Avatar image not found.")
+        return None
 
 
 def parse_duration(time_str):
