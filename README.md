@@ -99,22 +99,23 @@ spin-model --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h 
 
 ```bash
 # Apertus 70B - SwissAI model
-spin-model --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
+spin-model --model /a10/swiss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \ 
     --served-model-name swissai/apertus3-70b-0425 \
     --account YOUR_ACCOUNT \
     --tp-size 4
 
 # Standard model launches (using sp server)
 # Gemma 3 12B - Latest Google model with strong performance
-spin-model --model google/gemma-3-12b-it --tp-size 2 --time 4h --account YOUR_ACCOUNT
+# Sometimes this command doesn't work
+# spin-model --model google/gemma-3-12b-it --tp-size 2 --time 4h --account YOUR_ACCOUNT
 
-# Qwen 2.5 7B 
-spin-model --model Qwen/Qwen2.5-7B-Instruct --tp-size 2 --time 4h --account YOUR_ACCOUNT
-
+# vLLM-only architectures (must use --vllm flag)
 # DeepSeek 14B - Distilled version of Qwen for better efficiency
 spin-model --model deepseek-ai/DeepSeek-R1-Distill-Qwen-14B --tp-size 2 --time 4h --account YOUR_ACCOUNT
 
-# vLLM-only architectures (must use --vllm flag)
+# Qwen 2.5 7B 
+spin-model --model Qwen/Qwen2.5-7B-Instruct --tensor-parallel-size  2 --time 4h --account YOUR_ACCOUNT --vllm
+
 # Mistral 7B 
 spin-model --model mistralai/Mistral-7B-Instruct-v0.3 --tensor-parallel-size 2 --time 4h --account YOUR_ACCOUNT --vllm
 
