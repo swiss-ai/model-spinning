@@ -132,8 +132,6 @@ def main():
     if served_model_name and '--' in served_model_name:
         print("[Warning] The served model name contains dashes (--). This may cause issues.")
     
-    print(f"Served model name: {served_model_name if served_model_name else model}")
-
     if args.vllm_help:
         print(get_help_content("vllm-docs.txt"))
         sys.exit(0)
@@ -158,6 +156,8 @@ def main():
 
     # Store model name
     model = args.model
+
+    print(f"Served model name: {served_model_name if served_model_name else model}")
 
     # if not served_model_name:
     #     save_model_logo(model)
