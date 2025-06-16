@@ -19,7 +19,7 @@ A utility for launching and serving AI models on SLURM clusters at CSCS.
 
    ```bash
    # Launch Mistral 7B with tensor parallelism 2 for 30 minutes
-   spin-model --model mistralai/Mistral-7B-Instruct-v0.3 --tp-size 2 --time 30m --account YOUR_ACCOUNT
+   spin-model --model mistralai/Mistral-7B-Instruct-v0.3 --tensor-parallel-size 2 --time 30m --account YOUR_ACCOUNT --vllm
    ```
  
 ## Usage
