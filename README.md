@@ -132,7 +132,7 @@ spin-model --model CohereLabs/aya-expanse-8b --tensor-parallel-size 2 --time 4h 
 ### Local Model Launch and Apertus
 
 ```bash
-spin-model --model /a10/swiapertus3ss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
+spin-model --model /a10/swiss-alignment/checkpoints/apertus3-70B-iter_90000-tulu3-sft/checkpoint-14000 \
     --served-model-name swissai/apertus3-70b-0425 \
     --account YOUR_ACCOUNT \
     --tp-size 4
