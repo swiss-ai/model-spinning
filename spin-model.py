@@ -259,7 +259,7 @@ export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch
 {NCCL_SO_PATH}
 {env_vars}
 
-{ocf_command} start --bootstrap.addr /ip4/148.187.108.172/tcp/43905/p2p/QmQi91gEajE29jixXi95sw6BtvgsArbCFX4jHGDekPrKYq --subprocess "{serve_command}" \\
+{ocf_command} start --bootstrap.addr /ip4/148.187.108.172/tcp/43905/p2p/QmP3tRgnWak28wH27soURViY8WVNB5rqYbciacRRMMaXu6 --subprocess "{serve_command}" \\
     --service.name llm \\
     --service.port 8080
 """
