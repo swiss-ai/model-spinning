@@ -7,41 +7,6 @@ import re
 import subprocess
 import sys
 import requests
-# from bs4 import BeautifulSoup
-# import redis
-
-
-# redis_client = redis.Redis(
-#     host='major-kid-42419.upstash.io',
-#     port=6379,
-#     password=keys.REDIS_PASSWORD,
-#     ssl=True
-# )
-
-
-# def parse_hf_logo(hf_username):
-#     url = f"https://huggingface.co/{hf_username}"
-#     response = requests.get(url)
-#     if response.status_code != 200:
-#         print(f"Failed to load HF page for {hf_username}")
-#         return None
-
-#     soup = BeautifulSoup(response.text, 'html.parser')
-
-#     # Find the first <img> tag with all the specified classes
-#     img = soup.select_one("img.h-full.w-full.rounded-lg.object-cover")
-
-#     if img and img.has_attr('src'):
-#         return img['src']
-#     else:
-#         print("Avatar image not found.")
-#         return None
-
-
-# def save_model_logo(model):
-#     org = model.split('/')[0]
-#     img_url = parse_hf_logo("https://huggingface.co/" + org)
-#     redis_client.set(org, img_url)
 
 
 def parse_duration(time_str):
@@ -115,8 +80,8 @@ def get_help_content(filename):
         print(f"Failed to fetch from GitHub: {e}")
 
 
-def submit_job(job_script, logs_dir, log_files):
-    """Saves the job script, submits it with sbatch, and prints status."""
+def submit_job(job_script, logs_dir):
+    """Saves the job script, submits it with sbatch, and returns the job ID."""
     rand_suffix = ''.join(random.choices('0123456789abcdef', k=10))
     script_path = os.path.join(logs_dir, 'slurm_scripts', f'run_{rand_suffix}.sh')
     
@@ -132,7 +97,7 @@ def submit_job(job_script, logs_dir, log_files):
     if jobid_match:
         return jobid_match.group(0)
     else:
-        print("Warning: Could not extract job ID")
+        print(f"Warning: Could not extract job ID from sbatch output: {sbatch_output}")
         return None
 
 
@@ -293,7 +258,7 @@ export GLOO_SOCKET_IFNAME=lo
 
     jobids = []
     for i in range(1, args.num_instances + 1):
-        jobid = submit_job(job_script_template, logs_dir, log_files)
+        jobid = submit_job(job_script_template.replace('%s', str(i)), logs_dir)
         jobids.append(jobid)
 
     print(f"""
@@ -303,14 +268,14 @@ Job submitted. To know estimated time of start, run:
 Your job ID is: {' '.join(map(str, jobids))}
 
 To get more information about the job: 
-  scontrol show job {' '.join(map(str, jobids))}
+  scontrol show job <jobid>
 
 To cancel this job/model, run:
   scancel {' '.join(map(str, jobids))}
 
 To view logs for this job:
-  cat {log_files.replace('%j', jobid)}.out  # For stdout
-  cat {log_files.replace('%j', jobid)}.err  # For stderr
+  cat {log_files.replace('%j', "<jobid>")}.out  # For stdout
+  cat {log_files.replace('%j', "<jobid>")}.err  # For stderr
 
 Chat with model when it's ready: https://fmapi.swissai.cscs.ch/chat
 """)
