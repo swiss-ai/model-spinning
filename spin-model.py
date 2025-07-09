@@ -113,13 +113,35 @@ def get_help_content(filename):
         print(f"Failed to fetch {url}, status: {response.status_code}")
     except Exception as e:
         print(f"Failed to fetch from GitHub: {e}")
+
+
+def submit_job(job_script, logs_dir, log_files):
+    """Saves the job script, submits it with sbatch, and prints status."""
+    rand_suffix = ''.join(random.choices('0123456789abcdef', k=10))
+    script_path = os.path.join(logs_dir, 'slurm_scripts', f'run_{rand_suffix}.sh')
     
+    with open(script_path, "w") as f:
+        f.write(job_script)
+    
+    os.chmod(script_path, 0o755)
+
+    sbatch_result = run_cmd(["sbatch", script_path])
+    sbatch_output = sbatch_result.stdout.strip()
+    
+    jobid_match = re.search(r'\d+', sbatch_output)
+    if jobid_match:
+        return jobid_match.group(0)
+    else:
+        print("Warning: Could not extract job ID")
+        return None
+
 
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description="Launch a model on SLURM")
     parser.add_argument("--model", help="Name of the model to launch")
     parser.add_argument("--time", default="1h", help="Time duration for the job. Examples: 2h, 1h30m, 90m, 1:30:00")
+    parser.add_argument("-n", "--num-instances", type=int, default=1, help="Number of model instances to launch.")
     parser.add_argument("--vllm", action="store_true", help="Use vllm instead of sp to serve the model")
     parser.add_argument("--vllm-help", action="store_true", help="Show available options for **vllm** model server")
     parser.add_argument("--sp-help", action="store_true", help="Show available options for **sp** model server")
@@ -241,8 +263,14 @@ def main():
     # Create SLURM script content
     log_files = f"{logs_dir}/model-logs-%j"
 
-    job_script = f"""#!/bin/bash
-#SBATCH --job-name={'vllm' if args.vllm else 'sp'}-{served_model_name if served_model_name else model}
+    try:
+        bootstrap_addr = requests.get("http://148.187.108.172:8092/v1/dnt/bootstraps").json()['bootstraps'][0]
+    except (requests.exceptions.RequestException, KeyError, IndexError) as e:
+        print(f"Failed to fetch or parse bootstrap address: {e}. Using fallback.")
+        bootstrap_addr = "/ip4/148.187.108.172/tcp/43905/p2p/Qma3y5cF2g39h9sJTTESy5AoatmsWUb9dEmaScvPUBg1fw"
+
+    job_script_template = f"""#!/bin/bash
+#SBATCH --job-name={'vllm' if args.vllm else 'sp'}-{served_model_name if served_model_name else model}{"-%s" if args.num_instances > 1 else ""}
 #SBATCH --output={log_files}.out
 #SBATCH --error={log_files}.err
 #SBATCH --container-writable
@@ -255,54 +283,30 @@ def main():
 
 export NCCL_SOCKET_IFNAME=lo
 export GLOO_SOCKET_IFNAME=lo
-export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch
 {NCCL_SO_PATH}
 {env_vars}
 
-{ocf_command} start --bootstrap.addr /ip4/148.187.108.172/tcp/43905/p2p/QmQi91gEajE29jixXi95sw6BtvgsArbCFX4jHGDekPrKYq --subprocess "{serve_command}" \\
+{ocf_command} start --bootstrap.addr {bootstrap_addr} --subprocess "{serve_command}" \\
     --service.name llm \\
     --service.port 8080
 """
 
-    # Generate a random script name
-    rand_suffix = ''.join(random.choices('0123456789abcdef', k=10))
-    script_path = f"{logs_dir}/slurm_scripts/run_{rand_suffix}.sh"
-    
-    # Save the script to a file
-    with open(script_path, "w") as f:
-        f.write(job_script)
-    
-    # Make the script executable
-    os.chmod(script_path, 0o755)
-
-    # Submit the job and capture the output
-    sbatch_result = run_cmd(["sbatch", script_path])
-    sbatch_output = sbatch_result.stdout.strip()
-    print("sbatch command:", ["sbatch", script_path])
-    print("sbatch output:", sbatch_output)
-
-    # Extract the job ID from the output
-    jobid_match = re.search(r'\d+', sbatch_output)
-    if jobid_match:
-        jobid = jobid_match.group(0)
-    else:
-        print("Warning: Could not extract job ID")
-        jobid = "unknown"
-
-    # Clean up the script after submission
-    # os.remove(script_path)
+    jobids = []
+    for i in range(1, args.num_instances + 1):
+        jobid = submit_job(job_script_template, logs_dir, log_files)
+        jobids.append(jobid)
 
     print(f"""
 Job submitted. To know estimated time of start, run:
   squeue --me --start
 
-Your job ID is: {jobid}
+Your job ID is: {' '.join(map(str, jobids))}
 
 To get more information about the job: 
-  scontrol show job {jobid}
+  scontrol show job {' '.join(map(str, jobids))}
 
 To cancel this job/model, run:
-  scancel {jobid}
+  scancel {' '.join(map(str, jobids))}
 
 To view logs for this job:
   cat {log_files.replace('%j', jobid)}.out  # For stdout

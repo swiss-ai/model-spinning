@@ -25,7 +25,7 @@ A utility for launching and serving AI models on SLURM clusters at CSCS.
 ## Usage
 
 ```
-usage: spin-model [-h] [--model MODEL] [--time TIME] [--vllm] [--vllm-help]
+usage: spin-model [-h] [--model MODEL] [--time TIME] [-n NUM_INSTANCES] [--vllm] [--vllm-help]
                      [--sp-help] [--account ACCOUNT] [--env ENV]
                      [--environment ENVIRONMENT]
 
@@ -36,6 +36,8 @@ optional arguments:
   --model MODEL         Name of the model to launch
   --time TIME           Time duration for the job. Examples: 2h, 1h30m, 90m,
                         1:30:00
+  -n NUM_INSTANCES, --num-instances NUM_INSTANCES
+                        Number of model instances to launch.
   --vllm                Use vllm instead of sp to serve the model
   --vllm-help           Show available options for **vllm** model server
   --sp-help             Show available options for **sp** model server
@@ -81,6 +83,15 @@ The `--time` parameter accepts various formats:
 - `1:30:00` (1 hour and 30 minutes in SLURM format)
 
 Note: On Bristen nodes, time is limited to 1 hour maximum, while Clariden nodes allow up to 24 hours.
+
+### Launching Multiple Instances
+
+You can launch multiple instances of the same model to increase throughput with a single command using the `-n` or `--num-instances` option. Each instance will be submitted as a separate job with an indexed name (e.g., `job_name-1`, `job_name-2`).
+
+Example: Launch 3 instances of Mistral 7B:
+```bash
+spin-model --model mistralai/Mistral-7B-Instruct-v0.3 -n 3 --tensor-parallel-size 2 --time 30m --account YOUR_ACCOUNT --vllm
+```
 
 ### Environment Variables
 
