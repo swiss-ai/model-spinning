@@ -1,0 +1,31 @@
+name: Run Autospin
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 5 minutes (UTC)
+  workflow_dispatch:       # still allows manual trigger from GitHub UI
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'  # or whichever version you prefer
+
+    - name: Install dependencies
+      run: |
+        cd auto-spin
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Run Python script
+      env:
+        F7T_CLIENT_SECRET: ${{ secrets.F7T_CLIENT_SECRET }}
+      run: |
+        cd auto-spin/src
+        python -m autospin.spawn-model ../config.yaml
