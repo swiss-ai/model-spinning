@@ -8,15 +8,6 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
     serving_engine: "sp"
     time_limit: "24:00:00"
-  llama-prod:
-    instances: 1
-    model_name: "Llama-3.3-70B-Instruct"
-    model_path: "meta-llama/Llama-3.3-70B-Instruct"
-    model_args: ""
-    sub_process: "python3 -m sglang.launch_server --model-path ${MODEL_PATH} --host localhost --max-prefill-tokens 32768 --context-length 32768 --port 8080 --tp-size 4 ${PARSER_ARGS}"
-    environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
-    serving_engine: "sgl"
-    time_limit: "24:00:00"
   qwen-prod:
     instances: 3
     model_name: "Qwen/Qwen3-32B"
