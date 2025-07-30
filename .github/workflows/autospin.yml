@@ -2,7 +2,7 @@ name: Run Autospin
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # every 5 minutes (UTC)
+    - cron: '5/5 * * * *'  # every 5 minutes (UTC)
   workflow_dispatch:       # still allows manual trigger from GitHub UI
 jobs:
   run-script:
