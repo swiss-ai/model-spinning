@@ -4,6 +4,18 @@ on:
   schedule:
     - cron: '5/5 * * * *'  # every 5 minutes (UTC)
   workflow_dispatch:       # still allows manual trigger from GitHub UI
+  pull_request:
+    types:
+      - closed
+    branches:
+      - 'main'
+    paths:
+      - 'auto-spin/config.yaml'
+  push:
+    branches:
+      - 'main'
+    paths:
+      - 'auto-spin/config.yaml'
 jobs:
   run-script:
     runs-on: ubuntu-latest
