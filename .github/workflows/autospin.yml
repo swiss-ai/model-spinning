@@ -16,6 +16,12 @@ on:
       - 'main'
     paths:
       - 'auto-spin/config.yaml'
+
+concurrency:
+  group: "autosping"
+  cancel-in-progress: false
+
+
 jobs:
   run-script:
     runs-on: ubuntu-latest
