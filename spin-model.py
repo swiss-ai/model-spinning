@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Interactive usage: spin-model *
 
 import argparse
 import os
@@ -7,6 +8,209 @@ import re
 import subprocess
 import sys
 import requests
+
+# ANSI color codes
+RED = '\033[91m'
+GREEN = '\033[92m'
+RESET = '\033[0m'
+
+def print_warning(msg):
+    """Print warning message in red"""
+    print(f"{RED}{msg}{RESET}")
+
+def print_success(msg):
+    """Print success message in green"""
+    print(f"{GREEN}{msg}{RESET}")
+
+
+def get_saved_account():
+    """Load saved account from config file"""
+    config_file = os.path.expanduser("~/.spin-model-config")
+    if os.path.exists(config_file):
+        try:
+            with open(config_file, 'r') as f:
+                for line in f:
+                    if line.startswith('SPIN_MODEL_ACCOUNT='):
+                        return line.split('=', 1)[1].strip().strip('"\'')
+        except Exception as e:
+            print_warning(f"Warning: Could not read config file: {e}")
+    return None
+
+
+def save_account(account):
+    """Save account to config file"""
+    config_file = os.path.expanduser("~/.spin-model-config")
+    try:
+        # Read existing config
+        existing_lines = []
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                existing_lines = [line for line in f if not line.startswith('SPIN_MODEL_ACCOUNT=')]
+        
+        # Write back with new account
+        with open(config_file, 'w') as f:
+            f.writelines(existing_lines)
+            f.write(f'SPIN_MODEL_ACCOUNT="{account}"\n')
+        
+        print_success(f"Account '{account}' saved to {config_file}")
+    except Exception as e:
+        print_warning(f"Warning: Could not save account: {e}")
+
+
+def get_user_accounts():
+    """Get list of available SLURM accounts for current user"""
+    try:
+        cmd = "sacctmgr show associations user=$USER format=account%20 -n -P"
+        result = run_cmd(cmd, shell=True)
+        if result.returncode == 0:
+            accounts = [line.strip() for line in result.stdout.strip().split('\n') if line.strip()]
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_accounts = []
+            for account in accounts:
+                if account not in seen:
+                    seen.add(account)
+                    unique_accounts.append(account)
+            return unique_accounts
+        else:
+            print_warning("Could not retrieve accounts using sacctmgr")
+            return []
+    except Exception as e:
+        print_warning(f"Error getting accounts: {e}")
+        return []
+
+
+def interactive_account_selection():
+    """Interactive account selection interface"""
+    print_success("Getting your available SLURM accounts...")
+    accounts = get_user_accounts()
+    
+    if not accounts:
+        print_warning("No accounts found. Please contact your system administrator.")
+        return None
+    
+    print_success("Available accounts:")
+    for i, account in enumerate(accounts, 1):
+        print(f"  {i}. {account}")
+    
+    while True:
+        try:
+            choice = input(f"\nSelect account (1-{len(accounts)}): ").strip()
+            if choice.isdigit():
+                idx = int(choice) - 1
+                if 0 <= idx < len(accounts):
+                    selected_account = accounts[idx]
+                    save_account(selected_account)
+                    return selected_account
+                else:
+                    print_warning(f"Please enter a number between 1 and {len(accounts)}")
+            else:
+                print_warning("Please enter a valid number")
+        except KeyboardInterrupt:
+            print("\nExiting...")
+            return None
+        except EOFError:
+            print("\nExiting...")
+            return None
+
+
+# General default configuration
+GENERAL_CONFIG = {
+    "--host": "0.0.0.0",
+    "--port": 8080,
+    "--max-prefill-tokens": 8192,
+    "--context-length": 8192,
+    "--tp-size": 4
+}
+
+# Model registry with engine, tensor parallelism, and serving kwargs
+MODEL_REGISTRY = {
+    1: {
+        "name": "llama",
+        "path": "meta-llama/Llama-3.3-70B-Instruct",
+        "engine": "python3 -m sglang.launch_server",
+        "node": "bristen",
+        "environment": "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml",
+        "kwargs": {
+            "--model-path": "meta-llama/Llama-3.3-70B-Instruct",
+            "--max-prefill-tokens": 32768,
+            "--context-length": 32768,
+            "--host": "localhost",
+            "--reasoning-parser": "qwen3",
+            "--tool-call-parser": "qwen25"
+        }
+    },
+    2: {
+        "name": "qwen",
+        "path": "Qwen/Qwen3-32B",
+        "engine": "python3 -m sglang.launch_server",
+        "node": "bristen",
+        "environment": "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml",
+        "kwargs": {
+            "--model-path": "Qwen/Qwen3-32B",
+            "--max-prefill-tokens": 32768,
+            "--context-length": 32768,
+            "--host": "localhost",
+            "--reasoning-parser": "qwen3",
+            "--tool-call-parser": "qwen25"
+        }
+    },
+    3: {
+        "name": "apertus-10T",
+        "path": "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_858000-tulu3-sft/checkpoint-13446",
+        "engine": "sp serve",
+        "node": "bristen",
+        "environment": "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml",
+        "kwargs": {
+            "--served-model-name": "swissai/apertus3-70b-10T-sft"
+        }
+    },
+    4: {
+        "name": "apertus-9T",
+        "path": "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_798250-tulu3-sft/checkpoint-13446",
+        "engine": "sp serve",
+        "node": "bristen",
+        "environment": "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml",
+        "kwargs": {
+            "--served-model-name": "swissai/apertus3-70b_iter_798250"
+        }
+    },
+    5: {
+        "name": "apertus-8B",
+        "path": "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-8B_iter_1678000-tulu3-sft",
+        "engine": "sp serve",
+        "node": "bristen",
+        "environment": "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml",
+        "kwargs": {
+            "--served-model-name": "swissai/apertus3-8b_iter_1678000"
+        }
+    },
+    6: {
+        "name": "apertus-70B-iter1155828",
+        "path": "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_1155828-tulu3-sft/checkpoint-13446",
+        "engine": "sp serve",
+        "node": "bristen",
+        "environment": "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml",
+        "kwargs": {
+            "--served-model-name": "swissai/apertus3-70b_iter_1155828"
+        }
+    }
+}
+
+
+def list_models():
+    """Display available models in the registry"""
+    print_success("Available models:")
+    for model_id, config in MODEL_REGISTRY.items():
+        engine_color = GREEN if config['engine'] == 'sgl' else '\033[94m' if config['engine'] == 'vllm' else '\033[93m'
+        print(f"  {model_id}. {config['name']} ({config['path']})")
+        # Get TP size from combined config or default to "N/A" if not specified
+        model_kwargs = {**GENERAL_CONFIG, **config["kwargs"]}
+        tp_size = model_kwargs.get("--tp-size", "N/A")
+        print(f"     Engine: {engine_color}{config['engine']}{RESET}, TP: {tp_size}")
+        kwargs_str = ", ".join([f"{k}={v}" for k, v in config['kwargs'].items()])
+        print(f"     Args: {kwargs_str}")
+        print()
 
 
 def parse_duration(time_str):
@@ -97,27 +301,31 @@ def submit_job(job_script, logs_dir):
     if jobid_match:
         return jobid_match.group(0)
     else:
-        print(f"Warning: Could not extract job ID from sbatch output: {sbatch_output}")
+        print_warning(f"Warning: Could not extract job ID from sbatch output: {sbatch_output}")
         return None
 
 
 def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description="Launch a model on SLURM")
-    parser.add_argument("--model", help="Name of the model to launch")
-    parser.add_argument("--time", default="1h", help="Time duration for the job. Examples: 2h, 1h30m, 90m, 1:30:00")
+    parser.add_argument("--model", help="Name of the model to launch (deprecated, use -m)")
+    parser.add_argument("-m", "--model-id", type=int, help="Model ID from registry (use -l to list available models)")
+    parser.add_argument("-l", "--list", action="store_true", help="List available models in registry")
+    parser.add_argument("--login", action="store_true", help="Interactive account selection and save for future use")
+    parser.add_argument("-t", "--time", default="1h", help="Time duration for the job. Examples: 2h, 1h30m, 90m, 1:30:00")
     parser.add_argument("-n", "--num-instances", type=int, default=1, help="Number of model instances to launch.")
-    parser.add_argument("--vllm", action="store_true", help="Use vllm instead of sp to serve the model")
+    parser.add_argument("--vllm", action="store_true", help="Use vllm instead of sp to serve the model (overrides registry)")
+    parser.add_argument("--sgl", action="store_true", help="Use sglang instead of sp to serve the model (overrides registry)")
     parser.add_argument("--vllm-help", action="store_true", help="Show available options for **vllm** model server")
     parser.add_argument("--sp-help", action="store_true", help="Show available options for **sp** model server")
-    parser.add_argument("--account", help="Slurm account to use for job submission")
-    parser.add_argument("--env", action="append", help="Specify environment variables in format KEY=VALUE", default=[])
-    parser.add_argument("--environment", help="Specify a custom environment file path")
+    parser.add_argument("-a", "--account", help="Slurm account to use for job submission")
+    parser.add_argument("-v", "--var", action="append", help="Specify environment variables in format KEY=VALUE", default=[])
+    parser.add_argument("-e", "--environment", help="Specify a custom environment file path")
     # Parse only known arguments, leaving the rest for the sp command
     args, extra_args = parser.parse_known_args()
     served_model_name = next((extra_args[i+1] for i, arg in enumerate(extra_args) if arg == '--served-model-name'), None)
     if served_model_name and '--' in served_model_name:
-        print("[Warning] The served model name contains dashes (--). This may cause issues.")
+        print_warning("[Warning] The served model name contains dashes (--). This may cause issues.")
     
     if args.vllm_help:
         print(get_help_content("vllm-docs.txt"))
@@ -127,24 +335,101 @@ def main():
         print(get_help_content("sp-docs.txt"))
         sys.exit(0)
 
-    # Step 4: Require --model manually
-    if not args.model:
-        print("Error: --model is required.\n")
+    if args.list:
+        list_models()
+        sys.exit(0)
+    
+    if args.login:
+        account = interactive_account_selection()
+        if account:
+            print_success(f"Account '{account}' has been saved and will be used by default in future runs.")
+        sys.exit(0)
+    
+    # Check for interactive mode (spin-model *)
+    if len(sys.argv) == 2 and sys.argv[1] == '*':
+        print_success("Interactive mode activated!")
+        account = interactive_account_selection()
+        if not account:
+            sys.exit(1)
+        
+        # Show model list and get selection
+        list_models()
+        while True:
+            try:
+                model_choice = input(f"\nSelect model (1-{len(MODEL_REGISTRY)}): ").strip()
+                if model_choice.isdigit():
+                    model_id = int(model_choice)
+                    if model_id in MODEL_REGISTRY:
+                        # Set args as if they were passed via command line
+                        args.model_id = model_id
+                        args.account = account
+                        break
+                    else:
+                        print_warning(f"Please enter a number between 1 and {len(MODEL_REGISTRY)}")
+                else:
+                    print_warning("Please enter a valid number")
+            except KeyboardInterrupt:
+                print("\nExiting...")
+                sys.exit(0)
+            except EOFError:
+                print("\nExiting...")
+                sys.exit(0)
+
+    # Require either --model or -m
+    if not args.model and not args.model_id:
+        print_warning("Error: Either --model or -m (model ID) is required. Use -l to list available models.\n")
         parser.print_help()
+        sys.exit(1)
+    
+    if args.model_id and args.model_id not in MODEL_REGISTRY:
+        print_warning(f"Error: Model ID {args.model_id} not found in registry. Use -l to list available models.")
         sys.exit(1)
     
     # Handle account
     if not args.account:
-        print("No account specified. Checking available accounts...")
-        cmd = "sacctmgr show associations user=$USER format=user,account%20"
-        run_cmd(cmd, shell=True)
-        print("Please specify an account with --account")
-        sys.exit(1)
+        # Try to load saved account
+        saved_account = get_saved_account()
+        if saved_account:
+            args.account = saved_account
+            print_success(f"Using saved account: {saved_account}")
+        else:
+            print_warning("No account specified. Use --login to set up an account, or specify with -a/--account")
+            accounts = get_user_accounts()
+            if accounts:
+                print("Available accounts:")
+                for account in accounts:
+                    print(f"  - {account}")
+            print_warning("Please specify an account with -a/--account or use --login for interactive setup")
+            sys.exit(1)
 
-    # Store model name
-    model = args.model
+    # Store model information
+    if args.model_id:
+        model_config = MODEL_REGISTRY[args.model_id]
+        model = model_config["path"]
+        model_name = model_config["name"]
+        default_engine = model_config["engine"]
+        
+        # Union: general | model
+        model_kwargs = GENERAL_CONFIG | model_config["kwargs"]
+        tp_size = model_kwargs.get("--tp-size", 4)
+        
+        # Handle engine-specific argument mapping
+        extra_args_str = ' '.join(extra_args)
+        engine_name = default_engine.split()[0] if default_engine else "sp"
+        
+        if engine_name == "vllm" and "--tp-size" in extra_args_str:
+            extra_args_str = extra_args_str.replace("--tp-size", "--tensor-parallel-size")
+        
+        extra_args = extra_args_str.split() if extra_args_str else []
+    else:
+        # Legacy mode using --model
+        model = args.model
+        model_name = args.model
+        default_engine = "sp"
+        tp_size = 1
+        model_kwargs = {}
 
-    print(f"Served model name: {served_model_name if served_model_name else model}")
+    print(f"Served model name: {served_model_name if served_model_name else (model_name if args.model_id else model)}")
 
     # if not served_model_name:
     #     save_model_logo(model)
@@ -161,7 +446,10 @@ def main():
         PARTITION = ""
         ocf_command = "/ocfbin/ocf-v2"
         NCCL_SO_PATH = "export SP_NCCL_SO_PATH=/usr/lib/x86_64-linux-gnu/" 
-        ENV_TOML = args.environment if args.environment else "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp.toml"
+        if args.model_id and "environment" in model_config:
+            ENV_TOML = args.environment if args.environment else model_config["environment"]
+        else:
+            ENV_TOML = args.environment if args.environment else "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp.toml"
     elif hostname.startswith("clariden"):
         node = "clariden"
         print("Clariden node is used")
@@ -171,7 +459,7 @@ def main():
         NCCL_SO_PATH = "export SP_NCCL_SO_PATH=/usr/lib/aarch64-linux-gnu/" 
         ENV_TOML = args.environment if args.environment else "/capstor/store/cscs/swissai/a09/xyao/llm_service/clariden/sp-arm.toml"
         if "apertus" in model.lower() or any("apertus" in arg.lower() for arg in extra_args):
-            print("[Warning] It seems like you're trying to launch Apertus on Clariden. Please note that we can run Apertus only on Bristen.")
+            print_warning("[Warning] It seems like you're trying to launch Apertus on Clariden. Please note that we can run Apertus only on Bristen.")
     else:
         print("It's neither clariden nor bristen node. Aborting")
         sys.exit(1)
@@ -179,14 +467,14 @@ def main():
     # Default values
     home_dir = os.environ.get('HOME')
     if not home_dir:
-        print("Warning: HOME environment variable not set")
+        print_warning("Warning: HOME environment variable not set")
         random_bytes = random.randbytes(8).hex()
         home_dir = f"/tmp/{random_bytes}"
         try:
             os.makedirs(home_dir, exist_ok=True)
-            print(f"Created temporary directory at: {home_dir}")
+            print_success(f"Created temporary directory at: {home_dir}")
         except Exception as e:
-            print(f"Failed to create temporary directory: {e}")
+            print_warning(f"Failed to create temporary directory: {e}")
             sys.exit(1)
     logs_dir = os.path.join(home_dir, 'spinning-logs')
     
@@ -196,34 +484,46 @@ def main():
 
     # Convert timeout to SLURM format
     slurm_time = parse_duration(args.time)
-    print(f"Time allocated for model: {slurm_time}")
+    print_success(f"Time allocated for model: {slurm_time}")
 
 
-    # Construct the full command for serving
-    if args.vllm:
-        if node == "bristen": 
-            print("VLLM is not supported on Bristen, try to run this script on Clariden")
-            exit(1)
-
-        # Rewrite an NCCL.so path for vllm on clariden
-        NCCL_SO_PATH = "export VLLM_NCCL_SO_PATH=/usr/lib/aarch64-linux-gnu/"
-        if not args.environment:
-            ENV_TOML = "/capstor/store/cscs/swissai/a09/xyao/llm_service/clariden/vllm.toml"
-
-
-    serve_command = f"{'vllm' if args.vllm else 'sp'} serve {model} --host 0.0.0.0 --port 8080 {' '.join(extra_args)}"
+    # Build serve command using engine from registry or override
+    if args.model_id:
+        engine_cmd = model_config["engine"]
+        serve_args = [f"{key} {value}" for key, value in model_kwargs.items() if value is not True]
+        
+        if engine_cmd.startswith("sp serve"):
+            serve_command = f"{engine_cmd} {model} {' '.join(serve_args)} {' '.join(extra_args)}"
+        else:  # SGL
+            serve_command = f"{engine_cmd} {' '.join(serve_args)} {' '.join(extra_args)}"
+    else:
+        # Legacy mode - determine engine from command line args
+        if args.sgl:
+            serve_command = f"python3 -m sglang.launch_server --model-path {model} --host localhost --port 8080 --tp-size 4 {' '.join(extra_args)}"
+        elif args.vllm:
+            serve_command = f"vllm serve {model} --host 0.0.0.0 --port 8080 {' '.join(extra_args)}"
+        else:
+            serve_command = f"sp serve {model} --host 0.0.0.0 --port 8080 {' '.join(extra_args)}"
 
     # Print the constructed command
-    print("Command for serving:")
+    print_success("Command for serving:")
     print(serve_command)
 
-    # Process environment variables from --env
+    # Process environment variables from --var
     env_vars = ""
-    for env_var in args.env:
+    for env_var in args.var:
         if "=" in env_var:
             env_vars += f"export {env_var}\n"
         else:
-            print(f"Warning: Ignoring invalid environment variable format: {env_var}")
+            print_warning(f"Warning: Ignoring invalid environment variable format: {env_var}")
+    
+    # Add SGL-specific environment variables if using SGL
+    if args.model_id and "sglang" in model_config["engine"]:
+        env_vars += "export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch\n"
+        env_vars += "export NO_PROXY=0.0.0.0,127.0.0.1\n"
+    elif not args.model_id and args.sgl:
+        env_vars += "export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch\n"
+        env_vars += "export NO_PROXY=0.0.0.0,127.0.0.1\n"
 
     # Create SLURM script content
     log_files = f"{logs_dir}/model-logs-%j"
@@ -231,11 +531,11 @@ def main():
     try:
         bootstrap_addr = requests.get("http://148.187.108.172:8092/v1/dnt/bootstraps").json()['bootstraps'][0]
     except (requests.exceptions.RequestException, KeyError, IndexError) as e:
-        print(f"Failed to fetch or parse bootstrap address: {e}. Using fallback.")
+        print_warning(f"Failed to fetch or parse bootstrap address: {e}. Using fallback.")
         bootstrap_addr = "/ip4/148.187.108.172/tcp/43905/p2p/Qma3y5cF2g39h9sJTTESy5AoatmsWUb9dEmaScvPUBg1fw"
 
     job_script_template = f"""#!/bin/bash
-#SBATCH --job-name={'vllm' if args.vllm else 'sp'}-{served_model_name if served_model_name else model}{"-%s" if args.num_instances > 1 else ""}
+#SBATCH --job-name={'sgl' if args.sgl else 'vllm' if args.vllm else 'sp'}-{served_model_name if served_model_name else (model_name if args.model_id else model)}{"-%s" if args.num_instances > 1 else ""}
 #SBATCH --output={log_files}.out
 #SBATCH --error={log_files}.err
 #SBATCH --container-writable
@@ -261,7 +561,7 @@ export GLOO_SOCKET_IFNAME=lo
         jobid = submit_job(job_script_template.replace('%s', str(i)), logs_dir)
         jobids.append(jobid)
 
-    print(f"""
+    print_success(f"""
 Job submitted. To know estimated time of start, run:
   squeue --me --start
 
