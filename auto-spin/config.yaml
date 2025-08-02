@@ -1,0 +1,38 @@
+models:
+  apertus-70b-prod:
+    instances: 3
+    model_name: "swissai/apertus3-70b-15T-sft"
+    model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_1155828-tulu3-sft/checkpoint-13446/"
+    model_args: ""
+    sub_process: "sp serve ${MODEL_PATH} --served-model-name ${MODEL_NAME} --max-prefill-tokens 8192 --context-length 8192 --tp-size 4 --host 0.0.0.0 --port 8080"
+    environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
+    serving_engine: "sp"
+    time_limit: "24:00:00"
+  llama-prod:
+    instances: 1
+    model_name: "Llama-3.3-70B-Instruct"
+    model_path: "meta-llama/Llama-3.3-70B-Instruct"
+    model_args: ""
+    sub_process: "python3 -m sglang.launch_server --model-path ${MODEL_PATH} --host localhost --max-prefill-tokens 32768 --context-length 32768 --port 8080 --tp-size 4 ${PARSER_ARGS}"
+    environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
+    serving_engine: "sgl"
+    time_limit: "24:00:00"
+  qwen-prod:
+    instances: 1
+    model_name: "Qwen/Qwen3-32B"
+    model_args: "--reasoning-parser qwen3 --tool-call-parser qwen25"
+    model_path: "Qwen/Qwen3-32B"
+    sub_process: "python3 -m sglang.launch_server --model-path ${MODEL_PATH} --host localhost --max-prefill-tokens 32768 --context-length 32768 --port 8080 --tp-size 4 ${PARSER_ARGS}"
+    environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
+    serving_engine: "sgl"
+    time_limit: "24:00:00"
+
+system_name: "bristen"
+
+
+client_id: "6ade4584-868f-44b8-bffa-80054fd8bcfa"
+client_secret: "env:F7T_CLIENT_SECRET"
+token_uri: "https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-connect/token"
+firecrest_uri: "https://api.cscs.ch/ml/firecrest/v2"
+account: "a-infra01"
+bootstrap_addr: "/ip4/148.187.108.172/tcp/43905/p2p/Qma3y5cF2g39h9sJTTESy5AoatmsWUb9dEmaScvPUBg1fw"
