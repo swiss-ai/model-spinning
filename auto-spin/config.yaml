@@ -1,6 +1,6 @@
 models:
   apertus-70b-prod:
-    instances: 3
+    instances: 2
     model_name: "swissai/apertus3-70b-15T-sft"
     model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_1155828-tulu3-sft/checkpoint-13446/"
     model_args: ""
