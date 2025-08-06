@@ -7,7 +7,7 @@ models:
     sub_process: "sp serve ${MODEL_PATH} --served-model-name ${MODEL_NAME} --max-prefill-tokens 8192 --context-length 8192 --tp-size 4 --host 0.0.0.0 --port 8080"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
     serving_engine: "sp"
-    time_limit: "24:00:00"
+    time_limit: "12:00:00"
   llama-prod:
     instances: 1
     model_name: "Llama-3.3-70B-Instruct"
@@ -16,7 +16,7 @@ models:
     sub_process: "python3 -m sglang.launch_server --model-path ${MODEL_PATH} --host localhost --max-prefill-tokens 32768 --context-length 32768 --port 8080 --tp-size 4 ${PARSER_ARGS}"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "sgl"
-    time_limit: "24:00:00"
+    time_limit: "12:00:00"
   qwen-prod:
     instances: 1
     model_name: "Qwen/Qwen3-32B"
@@ -25,7 +25,7 @@ models:
     sub_process: "python3 -m sglang.launch_server --model-path ${MODEL_PATH} --host localhost --max-prefill-tokens 32768 --context-length 32768 --port 8080 --tp-size 4 ${PARSER_ARGS}"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "sgl"
-    time_limit: "24:00:00"
+    time_limit: "12:00:00"
 
 system_name: "clariden"
 
