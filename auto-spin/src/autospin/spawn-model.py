@@ -91,7 +91,7 @@ def main(config_path):
             return
 
     click.echo("Scanning for active jobs...")
-    jobs = client.job_info(system_name=config.system_name, allusers=True)
+    jobs = client.job_info(system_name=config.system_name, allusers=False)
     
     model_jobs = generate_jobs(config)
 
