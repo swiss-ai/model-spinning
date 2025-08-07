@@ -27,7 +27,7 @@ models:
     serving_engine: "sgl"
     time_limit: "12:00:00"
 
-system_name: "clariden"
+system_name: "bristen"
 
 
 client_id: "6ade4584-868f-44b8-bffa-80054fd8bcfa"
