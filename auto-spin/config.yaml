@@ -1,6 +1,6 @@
 models:
   apertus-70b-prod:
-    instances: 3
+    instances: 0
     model_name: "swissai/apertus3-70b-15T-sft"
     model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_1155828-tulu3-sft/checkpoint-13446/"
     model_args: ""
@@ -9,7 +9,7 @@ models:
     serving_engine: "sp"
     time_limit: "12:00:00"
   llama-prod:
-    instances: 1
+    instances: 0
     model_name: "Llama-3.3-70B-Instruct"
     model_path: "meta-llama/Llama-3.3-70B-Instruct"
     model_args: ""
@@ -18,7 +18,7 @@ models:
     serving_engine: "sgl"
     time_limit: "12:00:00"
   qwen-prod:
-    instances: 1
+    instances: 0
     model_name: "Qwen/Qwen3-32B"
     model_args: "--reasoning-parser qwen3 --tool-call-parser qwen25"
     model_path: "Qwen/Qwen3-32B"
