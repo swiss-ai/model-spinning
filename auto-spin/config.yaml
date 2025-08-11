@@ -1,6 +1,6 @@
 models:
   apertus-70b-prod:
-    instances: 3
+    instances: 0
     model_name: "swissai/apertus3-70b-15T-sft"
     model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus3-70B_iter_1155828-tulu3-sft/checkpoint-13446/"
     model_args: ""
@@ -35,4 +35,4 @@ client_secret: "env:F7T_CLIENT_SECRET"
 token_uri: "https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-connect/token"
 firecrest_uri: "https://api.cscs.ch/ml/firecrest/v2"
 account: "a-infra01"
-bootstrap_addr: "/ip4/148.187.108.172/tcp/43905/p2p/QmPQGCp7Q1jGeEPXa3DBe5xr7nYJCKPMG5Amwfv8fszio9"
+bootstrap_addr: "/ip4/148.187.108.172/tcp/43905/p2p/QmXgfdTibYLRr3FBNyh1hVBMS4mi2VU4uT2KjhdT59kopo"
