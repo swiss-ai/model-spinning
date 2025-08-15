@@ -21,6 +21,7 @@ class ModelConfig(BaseModel):
     environment:str
     serving_engine:str
     time_limit:str
+    ocf_version:str
 
 
 class Config(BaseModel):
