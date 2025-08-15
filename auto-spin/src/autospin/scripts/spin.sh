@@ -28,7 +28,10 @@ export MODEL_NAME={{model_name}}
     ./ocf-amd64 start --bootstrap.addr "/ip4/148.187.108.173/tcp/43905/p2p/QmU8KGe9pLe6nx2pNgVZUX4gaEd161gndVWKet7v1U2ABm" --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% else %}
- srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  /ocfbin/ocf-v2 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+ srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  --container-writable bash -c '\
+    BOOTSTRAP_ADDR=$(curl -s 148.187.108.172:8092/v1/dnt/bootstraps | python3 -c "import sys, json; data = json.load(sys.stdin); print(data['bootstraps'][0] if data.get('bootstraps') else '')")
+    /ocfbin/ocf-v2 start --bootstrap.addr ${BOOTSTRAP_ADDR} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    '
 {% endif %}
 
 
