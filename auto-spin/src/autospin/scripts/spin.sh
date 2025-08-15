@@ -19,11 +19,17 @@ export MODEL_PATH={{model_path}}
 export PARSER_ARGS="{{model_args}}"
 export MODEL_NAME={{model_name}}
 
-/ocfbin/ocf-v2 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
 
-# srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}} --container-writable bash -c '\
-#    cd /tmp
-#    curl -L "https://github.com/ResearchComputer/OpenComputeFramework/releases/download/v0.1.1/ocf-amd64" > ocf-amd64
-#    chmod +x ocf-amd64
-#    ./ocf-amd64 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
-#    '
+{% if 'v0.1.1' == ocf_version %}
+ srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}} --container-writable bash -c '\
+    cd /tmp
+    curl -L "https://github.com/ResearchComputer/OpenComputeFramework/releases/download/v0.1.1/ocf-amd64" > ocf-amd64
+    chmod +x ocf-amd64
+    ./ocf-amd64 start --bootstrap.addr "/ip4/148.187.108.173/tcp/43905/p2p/QmU8KGe9pLe6nx2pNgVZUX4gaEd161gndVWKet7v1U2ABm" --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    '
+{% else %}
+    /ocfbin/ocf-v2 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+{% endif %}
+
+
+
