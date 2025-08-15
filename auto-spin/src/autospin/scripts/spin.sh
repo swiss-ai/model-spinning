@@ -28,7 +28,7 @@ export MODEL_NAME={{model_name}}
     ./ocf-amd64 start --bootstrap.addr "/ip4/148.187.108.173/tcp/43905/p2p/QmU8KGe9pLe6nx2pNgVZUX4gaEd161gndVWKet7v1U2ABm" --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% else %}
-    /ocfbin/ocf-v2 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+ srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  /ocfbin/ocf-v2 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
 {% endif %}
 
 
