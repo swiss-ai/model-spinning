@@ -35,7 +35,7 @@ export MODEL_NAME={{model_name}}
     curl -L "https://github.com/ResearchComputer/OpenComputeFramework/releases/download/v0.1.1/ocf-amd64" > ocf-amd64
     chmod +x ocf-amd64
     pip install vllm
-    ./ocf-amd64 start --bootstrap.addr ${BOOTSTRAP_ADDR} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    ./ocf-amd64 start --bootstrap.addr "/ip4/148.187.108.173/tcp/43905/p2p/QmUQ5kuSmrj8iUKwzz54NUPnKpxSrZJ5RbCH3FjF6JYALP" --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% else %}
  srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  --container-writable bash -c '\
