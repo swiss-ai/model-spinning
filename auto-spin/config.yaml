@@ -34,11 +34,12 @@ models:
     model_name: "Llama-3.3-70B-Instruct"
     model_path: "meta-llama/Llama-3.3-70B-Instruct"
     model_args: ""
-    sub_process: "python3 -m sglang.launch_server --model-path ${MODEL_PATH} --host localhost --max-prefill-tokens 32768 --context-length 32768 --port 8080 --tp-size 4 ${PARSER_ARGS}"
+    sub_process: "python3 -m vllm.entrypoints.openai.api_server --model ${MODEL_PATH} --tensor-parallel-size 4 --host 0.0.0.0 --port 8080 --max-prefill-tokens 32768 --context-length 32768"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
-    serving_engine: "sgl"
+    serving_engine: "vllm"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.1"
+    ocf_version: "v0.1.1-vllm"
+
 
 system_name: "bristen"
 
