@@ -34,7 +34,7 @@ models:
     model_name: "Llama-3.3-70B-Instruct"
     model_path: "meta-llama/Llama-3.3-70B-Instruct"
     model_args: ""
-    sub_process: "python3 -m vllm.entrypoints.openai.api_server --model ${MODEL_PATH} --tensor-parallel-size 4 --host 0.0.0.0 --port 8080 --max-num-batched-tokens 32768 --max-model-len 32768"
+    sub_process: "python3 -m vllm.entrypoints.openai.api_server --model ${MODEL_PATH} --tensor-parallel-size 4 --host localhost --port 8080 --max-num-batched-tokens 32768 --max-model-len 32768"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "vllm"
     time_limit: "12:00:00"
