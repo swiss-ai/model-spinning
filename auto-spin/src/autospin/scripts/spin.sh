@@ -40,7 +40,7 @@ export MODEL_NAME={{model_name}}
 {% else %}
  srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  --container-writable bash -c '\
     BOOTSTRAP_ADDR=$(curl -s 148.187.108.172:8092/v1/dnt/bootstraps | python3 -c "import sys, json; data = json.load(sys.stdin); print(data['bootstraps'][0] if data.get('bootstraps') else '')")
-    /ocfbin/ocf-v2 start --bootstrap.addr ${BOOTSTRAP_ADDR} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    /ocfbin/ocf-v2 start --bootstrap.addr {{BOOTSTRAP_ADDR}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% endif %}
 
