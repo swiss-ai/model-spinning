@@ -30,7 +30,7 @@ models:
     time_limit: "12:00:00"
     ocf_version: "v0.1.0"
   llama-test:
-    instances: 1
+    instances: 0
     model_name: "Llama-3.3-70B-Instruct"
     model_path: "meta-llama/Llama-3.3-70B-Instruct"
     model_args: ""
