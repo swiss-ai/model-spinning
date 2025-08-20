@@ -38,7 +38,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "vllm"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.1-vllm"
+    ocf_version: "v0.1.1"
 
 
 system_name: "bristen"
