@@ -8,7 +8,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
     serving_engine: "sp"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.0"
+    ocf_version: "v0.1.1"
   llama-prod:
     instances: 0
     model_name: "Llama-3.3-70B-Instruct"
@@ -18,7 +18,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "sgl"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.0"
+    ocf_version: "v0.1.1"
   qwen-prod:
     instances: 0
     model_name: "Qwen/Qwen3-32B"
@@ -28,7 +28,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "sgl"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.0"
+    ocf_version: "v0.1.1"
   llama-test:
     instances: 0
     model_name: "Llama-3.3-70B-Instruct"
