@@ -25,10 +25,10 @@ export MODEL_NAME={{model_name}}
     cd /tmp
     curl -L "https://github.com/ResearchComputer/OpenComputeFramework/releases/download/v0.1.1/ocf-amd64" > ocf-amd64
     chmod +x ocf-amd64
-    ./ocf-amd64 start --bootstrap.addr {{BOOTSTRAP_ADDR}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    ./ocf-amd64 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% else %}
  srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  --container-writable bash -c '\
-    /ocfbin/ocf-v2 start --bootstrap.addr {{BOOTSTRAP_ADDR}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    /ocfbin/ocf-v2 start --bootstrap.addr {{bootstrap_addr}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% endif %}
