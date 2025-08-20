@@ -22,26 +22,13 @@ export MODEL_NAME={{model_name}}
 
 {% if 'v0.1.1' == ocf_version %}
  srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}} --container-writable bash -c '\
-    BOOTSTRAP_ADDR=$(curl -s 148.187.108.173:8092/v1/dnt/bootstraps | python3 -c "import sys, json; data = json.load(sys.stdin); print(data[\"bootstraps\"][0])")
     cd /tmp
     curl -L "https://github.com/ResearchComputer/OpenComputeFramework/releases/download/v0.1.1/ocf-amd64" > ocf-amd64
     chmod +x ocf-amd64
-    ./ocf-amd64 start --bootstrap.addr ${BOOTSTRAP_ADDR} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
-    '
-{% elif 'v0.1.1-vllm' == ocf_version %}
- srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}} --container-writable bash -c '\
-    BOOTSTRAP_ADDR=$(curl -s 148.187.108.173:8092/v1/dnt/bootstraps | python3 -c "import sys, json; data = json.load(sys.stdin); print(data[\"bootstraps\"][0])")
-    cd /tmp
-    curl -L "https://github.com/ResearchComputer/OpenComputeFramework/releases/download/v0.1.1/ocf-amd64" > ocf-amd64
-    chmod +x ocf-amd64
-    pip install vllm
-    ./ocf-amd64 start --bootstrap.addr "/ip4/148.187.108.173/tcp/43905/p2p/QmUQ5kuSmrj8iUKwzz54NUPnKpxSrZJ5RbCH3FjF6JYALP" --subprocess "{{sub_process}}" --service.name llm --service.port 8080
+    ./ocf-amd64 start --bootstrap.addr {{BOOTSTRAP_ADDR}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% else %}
  srun -N ${SLURM_JOB_NUM_NODES} --environment={{environment}}  --container-writable bash -c '\
-    BOOTSTRAP_ADDR=$(curl -s 148.187.108.172:8092/v1/dnt/bootstraps | python3 -c "import sys, json; data = json.load(sys.stdin); print(data['bootstraps'][0] if data.get('bootstraps') else '')")
     /ocfbin/ocf-v2 start --bootstrap.addr {{BOOTSTRAP_ADDR}} --subprocess "{{sub_process}}" --service.name llm --service.port 8080
     '
 {% endif %}
-
- bash -c 'BOOTSTRAP_ADDR=$(curl -s 148.187.108.173:8092/v1/dnt/bootstraps | python3 -c "import sys, json; data = json.load(sys.stdin); print(data[\"bootstraps\"][0])")'
