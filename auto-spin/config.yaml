@@ -9,7 +9,7 @@ models:
     serving_engine: "sp"
     time_limit: "12:00:00"
     ocf_version: "v0.1.1"
-  apertus-70b-prod:
+  apertus-8b-prod:
     instances: 1
     model_name: "swissai/Apertus-8B"
     model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus-8B-sft-mixture-8e-aligned/"
