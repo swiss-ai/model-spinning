@@ -4,6 +4,7 @@
 #SBATCH --time={{time_limit}}
 #SBATCH --ntasks-per-node=1
 #SBATCH --dependency=singleton
+#SBATCH --partition normal
 #SBATCH --account=a-infra01
 #SBATCH --output={{job_name}}-%j.out
 #SBATCH --error={{job_name}}-%j.err
