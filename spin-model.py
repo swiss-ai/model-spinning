@@ -520,10 +520,8 @@ def main():
     # Add SGL-specific environment variables if using SGL
     if args.model_id and "sglang" in model_config["engine"]:
         env_vars += "export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch\n"
-        env_vars += "export NO_PROXY=0.0.0.0,127.0.0.1\n"
     elif not args.model_id and args.sgl:
         env_vars += "export PROMETHEUS_MULTIPROC_DIR=/ocfbin/scratch\n"
-        env_vars += "export NO_PROXY=0.0.0.0,127.0.0.1\n"
 
     # Create SLURM script content
     log_files = f"{logs_dir}/model-logs-%j"
@@ -577,7 +575,7 @@ To view logs for this job:
   cat {log_files.replace('%j', "<jobid>")}.out  # For stdout
   cat {log_files.replace('%j', "<jobid>")}.err  # For stderr
 
-Chat with model when it's ready: https://fmapi.swissai.cscs.ch/chat
+Chat with model when it's ready: https://serving.swissai.cscs.ch/
 """)
 
 
