@@ -530,7 +530,7 @@ def main():
         bootstrap_addr = requests.get("http://148.187.108.172:8092/v1/dnt/bootstraps").json()['bootstraps'][0]
     except (requests.exceptions.RequestException, KeyError, IndexError) as e:
         print_warning(f"Failed to fetch or parse bootstrap address: {e}. Using fallback.")
-        bootstrap_addr = "/ip4/148.187.108.172/tcp/43905/p2p/Qma3y5cF2g39h9sJTTESy5AoatmsWUb9dEmaScvPUBg1fw"
+        bootstrap_addr = "/ip4/148.187.108.172/tcp/43905/p2p/QmcMpnf39qfJcXssHrFFw7nvAioLd4SXKhzBZ4XMcLDoSU"
 
     job_script_template = f"""#!/bin/bash
 #SBATCH --job-name={'sgl' if args.sgl else 'vllm' if args.vllm else 'sp'}-{served_model_name if served_model_name else (model_name if args.model_id else model)}{"-%s" if args.num_instances > 1 else ""}
