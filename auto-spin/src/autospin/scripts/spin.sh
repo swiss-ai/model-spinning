@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --dependency=singleton
 #SBATCH --partition normal
-#SBATCH --account=a-infra01
+#SBATCH --account=infra01
 #SBATCH --output={{job_name}}-%j.out
 #SBATCH --error={{job_name}}-%j.err
 
