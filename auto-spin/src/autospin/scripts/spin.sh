@@ -5,7 +5,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --dependency=singleton
 #SBATCH --partition=normal
-#SBATCH --account=a-csstaff
+### SBATCH --account= Account is defined in auto-spin/config.yaml 
 #SBATCH --output={{job_name}}-%j.out
 #SBATCH --error={{job_name}}-%j.err
 
