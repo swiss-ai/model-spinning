@@ -8,7 +8,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
     serving_engine: "sp"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.4"
+    ocf_version: "v0.1.8"
   apertus-8b-prod:
     instances: 1
     model_name: "swissai/Apertus-8B-Instruct"
@@ -18,7 +18,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
     serving_engine: "sp"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.4"
+    ocf_version: "v0.1.8"
   llama-prod:
     instances: 0
     model_name: "Llama-3.3-70B-Instruct"
@@ -28,7 +28,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "sgl"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.4"
+    ocf_version: "v0.1.8"
   qwen-prod:
     instances: 0
     model_name: "Qwen/Qwen3-32B"
@@ -38,7 +38,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "sgl"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.4"
+    ocf_version: "v0.1.8"
   llama-test:
     instances: 0
     model_name: "Llama-3.3-70B-Instruct"
@@ -48,7 +48,7 @@ models:
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sgl.toml"
     serving_engine: "vllm"
     time_limit: "12:00:00"
-    ocf_version: "v0.1.4"
+    ocf_version: "v0.1.8"
 
 
 system_name: "bristen"
