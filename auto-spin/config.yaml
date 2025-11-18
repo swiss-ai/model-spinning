@@ -1,8 +1,8 @@
 models:
   apertus-70b-prod:
     instances: 1
-    model_name: "swissai/Apertus-70B-Instruct"
-    model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus-70B-sft-mixture-8e-aligned/"
+    model_name: "swiss-ai/Apertus-70B-2509"
+    model_path: "/capstor/store/cscs/swissai/infra01/hf_models/swiss-ai/Apertus-70B-2509"
     model_args: ""
     sub_process: "sp serve ${MODEL_PATH} --served-model-name ${MODEL_NAME} --max-prefill-tokens 8192 --context-length 8192 --tp-size 4 --host 0.0.0.0 --port 8080"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
@@ -11,8 +11,8 @@ models:
     ocf_version: "v0.1.4"
   apertus-8b-prod:
     instances: 1
-    model_name: "swissai/Apertus-8B-Instruct"
-    model_path: "/capstor/store/cscs/swissai/infra01/swiss-alignment/checkpoints/Apertus-8B-sft-mixture-8e-aligned/"
+    model_name: "swiss-ai/Apertus-8B-Instruct-2509"
+    model_path: "/capstor/store/cscs/swissai/infra01/hf_models/swiss-ai/Apertus-8B-Instruct-2509"
     model_args: ""
     sub_process: "sp serve ${MODEL_PATH} --served-model-name ${MODEL_NAME} --max-prefill-tokens 8192 --context-length 8192 --tp-size 4 --host 0.0.0.0 --port 8080"
     environment: "/capstor/store/cscs/swissai/a09/xyao/llm_service/sp-dev.toml"
