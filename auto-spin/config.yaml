@@ -60,4 +60,4 @@ token_uri: "https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-c
 firecrest_uri: "https://api.cscs.ch/ml/firecrest/v2"
 account: "infra01"
 bootstrap_addr: "/ip4/148.187.108.172/tcp/43905/p2p/QmQsNxJVa2rnidp998qAz4FCutgmjBsuZqtrxUUy5YfgBu"
-user_id: "env:F7T_USER_ID"
+user_id: "env:USER_ID"

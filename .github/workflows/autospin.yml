@@ -43,8 +43,9 @@ jobs:
 
     - name: Run Python script
       env:
-        F7T_CLIENT_ID: ${{ secrets.F7T_CLIENT_ID }}
+        F7T_CLIENT_ID: ${{ vars.F7T_CLIENT_ID }}
         F7T_CLIENT_SECRET: ${{ secrets.F7T_CLIENT_SECRET }}
+        USER_ID: ${{ vars.USER_ID }}
       run: |
         cd auto-spin/src
         python -m autospin.spawn-model ../config.yaml
