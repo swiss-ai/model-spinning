@@ -28,6 +28,7 @@ class Config(BaseModel):
     models: Dict[str, ModelConfig]
     client_id: str
     client_secret: str
+    user_id:str
     token_uri:str
     firecrest_uri:str
     system_name:str
