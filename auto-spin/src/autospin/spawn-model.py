@@ -77,6 +77,9 @@ def main(config_path):
     if config.client_secret.startswith("env:"):
         config.client_secret=os.getenv(config.client_secret.removeprefix("env:"))
 
+    if config.client_id.startswith("env:"):
+        config.client_id=os.getenv(config.client_id.removeprefix("env:"))
+        
     # Create an authorization object with Client Credentials authorization grant
     keycloak = f7t.ClientCredentialsAuth(
         config.client_id, config.client_secret, config.token_uri
