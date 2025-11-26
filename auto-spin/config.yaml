@@ -54,7 +54,7 @@ models:
 system_name: "bristen"
 
 
-client_id: "6ade4584-868f-44b8-bffa-80054fd8bcfa"
+client_id: "env:F7T_CLIENT_ID"
 client_secret: "env:F7T_CLIENT_SECRET"
 token_uri: "https://auth.cscs.ch/auth/realms/firecrest-clients/protocol/openid-connect/token"
 firecrest_uri: "https://api.cscs.ch/ml/firecrest/v2"
