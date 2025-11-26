@@ -79,6 +79,9 @@ def main(config_path):
 
     if config.client_id.startswith("env:"):
         config.client_id=os.getenv(config.client_id.removeprefix("env:"))
+
+    if config.user_id.startswith("env:"):
+        config.user_id=os.getenv(config.user_id.removeprefix("env:"))
         
     # Create an authorization object with Client Credentials authorization grant
     keycloak = f7t.ClientCredentialsAuth(
@@ -119,7 +122,7 @@ def main(config_path):
     if len(missing_jobs_ids) > 0:
         click.echo("Starting missing jobs...")
         for job_id in missing_jobs_ids: 
-            client.submit(system_name=config.system_name, script_str=model_jobs[job_id],account=config.account,working_dir="/users/palmee/dispatcher")
+            client.submit(system_name=config.system_name, script_str=model_jobs[job_id],account=config.account,working_dir=f"/users/{config.user_id}/dispatcher")
             click.echo(f"🚀 job: {job_id} scheduled")
     
     if len(zombie_models) > 0:
