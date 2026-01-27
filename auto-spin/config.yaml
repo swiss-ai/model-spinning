@@ -1,6 +1,6 @@
 models:
   apertus-70b-prod:
-    instances: 1
+    instances: 0
     model_name: "swiss-ai/Apertus-70B-Instruct-2509"
     model_path: "/capstor/store/cscs/swissai/infra01/hf_models/models/swiss-ai/Apertus-70B-Instruct-2509"
     model_args: ""
@@ -10,7 +10,7 @@ models:
     time_limit: "12:00:00"
     ocf_version: "v0.1.8"
   apertus-8b-prod:
-    instances: 1
+    instances: 0
     model_name: "swiss-ai/Apertus-8B-Instruct-2509"
     model_path: "/capstor/store/cscs/swissai/infra01/hf_models/models/swiss-ai/Apertus-8B-Instruct-2509"
     model_args: ""
