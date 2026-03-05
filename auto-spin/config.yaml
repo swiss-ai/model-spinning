@@ -51,7 +51,7 @@ models:
     ocf_version: "v0.1.8"
 
 
-system_name: "bristen"
+system_name: "clariden"
 
 
 client_id: "env:F7T_CLIENT_ID"
